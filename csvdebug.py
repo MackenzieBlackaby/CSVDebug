@@ -1,7 +1,15 @@
 from pathlib import Path
 from os import system, name as osName
+from sys import exit as sysExit
 
 system("cls" if osName == "nt" else "clear")
+
+BOLD = "\033[1m"
+RED = "\033[31m"
+YELLOW = "\033[33m"
+RESET = "\033[0m"
+BLUE = "\033[34m"
+GREEN = "\033[32m"
 
 
 def readLines(path):
@@ -19,6 +27,28 @@ def comp(a: int, b: int):
     return a if a > b else b
 
 
+def highlightDifferences(model: str, target: str):
+    outModel = []
+    outTest = []
+
+    maxLen = max(len(modelLine), len(testLine))
+
+    for i in range(maxLen):
+        chModel = modelLine[i] if i < len(modelLine) else ""
+        chTest = testLine[i] if i < len(testLine) else ""
+
+        if chModel == chTest:
+            outModel.append(chModel)
+            outTest.append(chTest)
+        else:
+            if chModel:
+                outModel.append(f"{RED}{chModel}{RESET}")
+            if chTest:
+                outTest.append(f"{GREEN}{chTest}{RESET}")
+
+    return "".join(outModel), "".join(outTest)
+
+
 linesToSliceAround = 5
 modelPrefix = Path("model")
 suffix = ".csv"
@@ -31,8 +61,8 @@ modelPaths = []
 for p in testPaths:
     modelFile = modelPrefix / p.name
     if not modelFile.exists():
-        raise FileNotFoundError(
-            f"Missing model file for {p.name}. Please put the corresponding file in the model directory"
+        sysExit(
+            f'\n{BOLD}{RED}[ERROR]:{RESET} Missing model file for "{p.name}". Please put the corresponding file in the model directory :)\n'
         )
     modelPaths.append(modelFile)
 
@@ -51,9 +81,10 @@ for i, (testPath, modelPath) in enumerate(zip(testPaths, modelPaths), start=1):
         modelLine = modelLines[l] if l < len(modelLines) else "<NO LINE>"
 
         if testLine != modelLine:
-            print(f"\n[#]    Mismatch at line {l + 1}:\n")
-            print(f"[!]    Model:     {"{ "}{modelLine}{" }"}")
-            print(f"[?]    Yours:     {"{ "}{testLine}{" }"}")
+            hlModel, hlTest = highlightDifferences(testLine, modelLine)
+            print(f"\n{BOLD}{RED}[#]    Mismatch at line {l + 1}:{RESET}\n")
+            print(f"[!]    Model:     {"{ "}{hlModel}{" }"}{RESET}")
+            print(f"[?]    Yours:     {"{ "}{hlTest}{" }"}{RESET}")
             while True:
                 print(
                     '\nInput "p" to print surrounding lines, "o" to override this error, or "s" to skip this file'
@@ -66,7 +97,7 @@ for i, (testPath, modelPath) in enumerate(zip(testPaths, modelPaths), start=1):
                     for j in range(start, end):
                         label = f"Line {j + 1}"
                         if j == 1:
-                            label += " [ERROR]"
+                            label += f"{BOLD}{RED} [ERROR] {RESET}"
                         print(label)
                         print(
                             "              [  Model  ]: "
@@ -86,4 +117,4 @@ for i, (testPath, modelPath) in enumerate(zip(testPaths, modelPaths), start=1):
         if skip:
             break
     if not isError:
-        print(f"[ :) ] File {i} ({testPath}) matches perfectly.\n")
+        print(f"{BOLD}{GREEN}[ :) ] File {i} ({testPath}) matches perfectly.{RESET}\n")
