@@ -9,8 +9,8 @@ A tool to compare multiple csv files line by line to model csv files. Useful in 
 This tool is simple to use.
 
 1. Clone this repository
-2. Place your desired "model" csv files in the `./model/` directory
-3. Place the files you'd like to test in the root directory of the repo
+2. Place the files you'd like to test in the root directory
+3. Place your desired "model" csv files **_with the same name as the files to test against_** in the `./model/` directory
 4. Run the command `py csvdebug.py` and follow the instructions to begin debugging
 
 ### Commands
@@ -19,9 +19,9 @@ The program will automatically detect both test and model csv files to be run. I
 
 If an error is found, the program will display an error and await one of three letter commands:
 
-- `p` prints the surrounding lines
-- `o` overrides the error and continues to the next line
-- `s` skips the remainder of the file, if the error is such that all subsequent lines are different
+-   `p` prints the surrounding lines
+-   `o` overrides the error and continues to the next line
+-   `s` skips the remainder of the file, if the error is such that all subsequent lines are different
 
 ## Directory structure
 
