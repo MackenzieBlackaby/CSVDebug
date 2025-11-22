@@ -27,24 +27,24 @@ def comp(a: int, b: int):
     return a if a > b else b
 
 
-def highlightDifferences(model: str, target: str):
+def highlightDifferences(model: str, test: str):
     outModel = []
     outTest = []
 
-    maxLen = max(len(modelLine), len(testLine))
+    maxLen = max(len(model), len(test))
 
     for i in range(maxLen):
-        chModel = modelLine[i] if i < len(modelLine) else ""
-        chTest = testLine[i] if i < len(testLine) else ""
+        chModel = model[i] if i < len(model) else ""
+        chTest = test[i] if i < len(test) else ""
 
         if chModel == chTest:
             outModel.append(chModel)
             outTest.append(chTest)
         else:
             if chModel:
-                outModel.append(f"{RED}{chModel}{RESET}")
+                outModel.append(f"{GREEN}{chModel}{RESET}")
             if chTest:
-                outTest.append(f"{GREEN}{chTest}{RESET}")
+                outTest.append(f"{RED}{chTest}{RESET}")
 
     return "".join(outModel), "".join(outTest)
 
@@ -81,7 +81,7 @@ for i, (testPath, modelPath) in enumerate(zip(testPaths, modelPaths), start=1):
         modelLine = modelLines[l] if l < len(modelLines) else "<NO LINE>"
 
         if testLine != modelLine:
-            hlModel, hlTest = highlightDifferences(testLine, modelLine)
+            hlModel, hlTest = highlightDifferences(modelLine, testLine)
             print(f"\n{BOLD}{RED}[#]    Mismatch at line {l + 1}:{RESET}\n")
             print(f"[!]    Model:     {"{ "}{hlModel}{" }"}{RESET}")
             print(f"[?]    Yours:     {"{ "}{hlTest}{" }"}{RESET}")
@@ -92,21 +92,22 @@ for i, (testPath, modelPath) in enumerate(zip(testPaths, modelPaths), start=1):
                 temp = input("\n[*]: ").strip().lower()
                 if temp[0] == "p":
                     print("\n---")
-                    start = max(0, 1 - linesToSliceAround)
-                    end = min(maxLen, 2 + linesToSliceAround)
+                    start = max(0, l - linesToSliceAround)
+                    end = min(maxLen, l + linesToSliceAround + 1)
                     for j in range(start, end):
                         label = f"Line {j + 1}"
-                        if j == 1:
+                        if j == l:
                             label += f"{BOLD}{RED} [ERROR] {RESET}"
                         print(label)
-                        print(
-                            "              [  Model  ]: "
-                            + ("EOF" if j >= len(modelLines) else modelLines[j])
+                        currentModelLine = (
+                            "EOF" if j >= len(modelLines) else modelLines[j]
                         )
-                        print(
-                            "              [  Yours   ]: "
-                            + ("EOF" if j >= len(testLines) else testLines[j])
+                        currentTestLine = "EOF" if j >= len(testLines) else testLines[j]
+                        hlCMod, hlCTest = highlightDifferences(
+                            currentModelLine, currentTestLine
                         )
+                        print("              [  Model  ]: " + hlCMod)
+                        print("              [  Yours  ]: " + hlCTest)
                         print("---")
                     print("\n")
                 elif temp[0] == "s":
